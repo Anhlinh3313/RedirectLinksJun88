@@ -1,0 +1,37 @@
+﻿@model Link
+<div class="form-group">
+    <label><span class="text-danger">(*)</span>Nhóm link:</label>
+    <select id="modal-link-group-id" class="form-control">
+        <option value="">Chọn nhóm link</option>
+        @{
+            var linkGroups = ViewBag.LinkGroups as List<LinkGroup>;
+            if (linkGroups != null && linkGroups.Count > 0)
+            {
+                foreach (var item in linkGroups)
+                {
+                    if (Model.LinkGroupId == item.Id)
+                    {
+                        <option value="@item.Id" selected>@item.LinkGroupName</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Id">@item.LinkGroupName</option>
+                    }
+                }
+            }
+        }
+    </select>
+</div>
+<div class="form-group">
+    <label><span class="text-danger">(*)</span>Link:</label>
+    <input id="modal-url" class="form-control" type="text" placeholder="Nhập link" value="@Model.Url" />
+</div>
+<div class="form-group">
+    <label><span class="text-danger">(*)</span>Sắp xếp:</label>
+    <input id="modal-link-order" class="form-control" type="number" placeholder="Nhập vị trí của link" value="@Model.LinkOrder" />
+</div>
+<div class="text-center">
+    <input id="link-id" type="hidden" value="@Model.Id" />
+    <input id="modal-btn-update-link" type="button" class="btn btn-primary" value="Sửa link" />
+</div>
+<script src="~/js/update-link.js"></script>

@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_PublishTargetUrl>D:\Jun88\RedirectLinks\RedirectLinksJun88\RedirectLinks\bin\Release\net5.0\publish\</_PublishTargetUrl>
+    <History>True|2022-07-26T09:45:37.0272104Z;True|2022-07-26T16:43:21.7040394+07:00;True|2022-06-16T16:45:41.0476875+07:00;True|2022-06-13T22:49:25.9508276+07:00;True|2022-06-13T22:33:40.1767623+07:00;True|2022-06-13T21:48:49.5305899+07:00;</History>
+  </PropertyGroup>
+</Project>

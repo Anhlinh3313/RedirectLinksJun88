@@ -1,0 +1,355 @@
+﻿@model PagedModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý links";
+    List<int> pageSizes = new List<int>();
+    pageSizes.Add(10);
+    pageSizes.Add(20);
+    pageSizes.Add(30);
+    pageSizes.Add(40);
+    pageSizes.Add(50);
+    pageSizes.Add(100);
+    pageSizes.Add(200);
+    pageSizes.Add(1000);
+}
+@section scripts{
+    <script src="~/js/link.js"></script>
+}
+
+<!--Hiddens-->
+<input id="hidden-link-group-id" type="hidden" value="@ViewBag.LinkGroupId" />
+
+<div id="link-manager">
+    <div class="col-11 m-auto">
+        <h1 class="text-center mt-4 mb-4">Quản lý links</h1>
+        <div class="border-bottom pb-1 mb-2">
+            <div class="w-50 float-left">
+                <div class="form-inline">
+                    <select id="link-group-for-search" class="form-control">
+                        <option value="">Chọn nhóm link</option>
+                        @{
+                            var linkGroups = ViewBag.LinkGroups as List<LinkGroup>;
+                            if (linkGroups != null && linkGroups.Count > 0)
+                            {
+                                foreach (var item in linkGroups)
+                                {
+                                    if (ViewBag.LinkGroupId == item.Id)
+                                    {
+                                        <option value="@item.Id" selected>@item.LinkGroupName</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.LinkGroupName</option>
+                                    }
+                                }
+                            }
+                        }
+                    </select>
+                    <input id="btn-search" type="button" class="btn btn-primary ml-2" value="Tìm kiếm" />
+                </div>
+            </div>
+            <div class="w-50 float-left">
+                <div class="text-right">
+                    <span>Thêm link mới: </span>
+                    <input type="button" class="btn btn-primary" value="Thêm mới" data-toggle="modal" data-target="#insert-link-modal" />
+                </div>
+            </div>
+            <div class="clear-both"></div>
+        </div>
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nhóm</th>
+                    <th>Url</th>
+                    <th>Vị trí</th>
+                    <th>Thời gian tạo</th>
+                    <th>Thời gian sửa</th>
+                    <th class="text-center">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var links = Model.Data as List<LinkViewModel>;
+                    if (links != null && links.Count > 0)
+                    {
+                        foreach (var item in links)
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td class="col-3 p-1">
+                                    @{
+                                        string url = "";
+                                        if (item.LinkGroupName == "jun88")
+                                        {
+                                            url = "https://jun88.vin";
+                                        }
+                                        else
+                                        {
+                                            url = "https://jun88.vin?link=" + item.LinkGroupName;
+                                        }
+                                    }
+                                    @url
+                                </td>
+                                <td class="col-3 p-1">@item.Url</td>
+                                <td>@item.LinkOrder</td>
+                                <td>@item.CreatedTime</td>
+                                <td>@item.UpdatedTime</td>
+                                <td class="col-2 p-0 text-center">
+                                    <div class="d-inline-block btn-group-m" style="margin-top: 13px;">
+                                        <button class="btn btn-danger btn-sm btn-delete-link" link-id="@item.Id">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                                <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z" />
+                                            </svg>
+                                        </button>
+                                        <button class="btn btn-success btn-sm btn-update-link" link-id="@item.Id">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+        <!--Paging-->
+        <div class="mt-4 text-center">
+            <div id="pagination-container d-inline-block">
+                <ul class="list-unstyled d-inline-block">
+                    @{
+                        var pageIndex = (int)ViewBag.PageIndex;
+                        var totalPage = Model.TotalPage;
+                        if (totalPage < 10)
+                        {
+                            for (int i = 1; i <= totalPage; i++)
+                            {
+                                var href = "/admin/index?linkGroupId=" + ViewBag.LinkGroupId + "&pageIndex=" + i + "&pageSize=" + ViewBag.PageSize;
+                                <li class="d-inline-block">
+                                    <a href="@href">
+                                        <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                            @{
+                                                if (pageIndex == i)
+                                                {
+                                                    <p class="m-0 text-warning font-weight-bold">@i</p>
+                                                }
+                                                else
+                                                {
+                                                    <p class="m-0 text-white">@i</p>
+                                                }
+                                            }
+                                        </div>
+                                    </a>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            var firstHref = "/admin/index?linkGroupId=" + ViewBag.LinkGroupId + "&pageIndex=1" + "&pageSize=" + ViewBag.PageSize;
+                            <li class="d-inline-block">
+                                <a href="@firstHref">
+                                    <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                        @{
+                                            if (pageIndex == 1)
+                                            {
+                                                <p class="m-0 text-warning font-weight-bold">1</p>
+                                            }
+                                            else
+                                            {
+                                                <p class="m-0 text-white">1</p>
+                                            }
+                                        }
+                                    </div>
+                                </a>
+                            </li>
+                            if (pageIndex <= 6)
+                            {
+                                for (var i = 2; i <= 9; i++)
+                                {
+                                    var href = "/admin/index?linkGroupId=" + ViewBag.LinkGroupId + "&pageIndex=" + i + "&pageSize=" + ViewBag.PageSize;
+                                    <li class="d-inline-block">
+                                        <a href="@href">
+                                            <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                                @{
+                                                    if (pageIndex == i)
+                                                    {
+                                                        <p class="m-0 text-warning font-weight-bold">@i</p>
+                                                    }
+                                                    else
+                                                    {
+                                                        <p class="m-0 text-white">@i</p>
+                                                    }
+                                                }
+                                            </div>
+                                        </a>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="d-inline-block">
+                                    <a href="#">
+                                        <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                            <p class="m-0 text-white">...</p>
+                                        </div>
+                                    </a>
+                                </li>
+                                if (pageIndex <= totalPage - 5)
+                                {
+                                    for (int i = pageIndex - 5; i <= pageIndex + 5; i++)
+                                    {
+                                        var href = "/admin/index?linkGroupId=" + ViewBag.LinkGroupId + "&pageIndex=" + i + "&pageSize=" + ViewBag.PageSize;
+                                        <li class="d-inline-block">
+                                            <a href="@href">
+                                                <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                                    @{
+                                                        if (pageIndex == i)
+                                                        {
+                                                            <p class="m-0 text-warning font-weight-bold">@i</p>
+                                                        }
+                                                        else
+                                                        {
+                                                            <p class="m-0 text-white">@i</p>
+                                                        }
+                                                    }
+                                                </div>
+                                            </a>
+                                        </li>
+                                    }
+                                    <li class="d-inline-block">
+                                        <a href="#">
+                                            <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                                <p class="m-0 text-white">...</p>
+                                            </div>
+                                        </a>
+                                    </li>
+                                }
+                                else
+                                {
+                                    var lastPage = pageIndex + (totalPage - pageIndex);
+                                    for (int i = pageIndex - 5; i < lastPage; i++)
+                                    {
+                                        var href = "/admin/index?linkGroupId=" + ViewBag.LinkGroupId + "&pageIndex=" + i + "&pageSize=" + ViewBag.PageSize;
+                                        <li class="d-inline-block">
+                                            <a href="@href">
+                                                <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                                    @{
+                                                        if (pageIndex == i)
+                                                        {
+                                                            <p class="m-0 text-warning font-weight-bold">@i</p>
+                                                        }
+                                                        else
+                                                        {
+                                                            <p class="m-0 text-white">@i</p>
+                                                        }
+                                                    }
+                                                </div>
+                                            </a>
+                                        </li>
+                                    }
+                                }
+                            }
+                            var lastHref = "/admin/index?linkGroupId=" + ViewBag.LinkGroupId + "&pageIndex=" + totalPage + "&pageSize=" + ViewBag.PageSize;
+                            <li class="d-inline-block">
+                                <a href="@lastHref">
+                                    <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                        @{
+                                            if (pageIndex == totalPage)
+                                            {
+                                                <p class="m-0 text-warning font-weight-bold">@totalPage</p>
+                                            }
+                                            else
+                                            {
+                                                <p class="m-0 text-white">@totalPage</p>
+                                            }
+                                        }
+                                    </div>
+                                </a>
+                            </li>
+                        }
+                    }
+
+                </ul>
+                <div class="d-inline-block ml-2">
+                    <div class="form-inline">
+                        <label>Hiển thị:</label>
+                        <select id="page-size-select" class="form-control ml-2">
+                            @{
+                                foreach (var pageSize in pageSizes)
+                                {
+                                    if (ViewBag.PageSize == pageSize)
+                                    {
+                                        <option value="@pageSize" selected>@pageSize</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@pageSize">@pageSize</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="insert-link-modal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="insert-link" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm mới link</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="insert-link-modal-body">
+                <div class="form-group">
+                    <label><span class="text-danger">(*)</span>Nhóm link:</label>
+                    <select id="link-group-id" class="form-control">
+                        <option value="">Chọn nhóm link</option>
+                        @{
+                            if (linkGroups != null && linkGroups.Count > 0)
+                            {
+                                foreach (var item in linkGroups)
+                                {
+                                    <option value="@item.Id">@item.LinkGroupName</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><span class="text-danger">(*)</span>Link:</label>
+                    <input id="url" class="form-control" type="text" placeholder="Nhập link" />
+                </div>
+                <div class="form-group">
+                    <label><span class="text-danger">(*)</span>Sắp xếp:</label>
+                    <input id="link-order" class="form-control" type="number" placeholder="Nhập vị trí của link" />
+                </div>
+                <div class="text-center">
+                    <input id="btn-insert-link" type="button" class="btn btn-primary" value="Thêm mới" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="update-link-modal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="update-link" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa thông tin link</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="update-link-modal-body">
+
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,11 @@
+﻿@model LinkGroup
+<div class="form-group">
+    <label>Tên nhóm link:</label>
+    <input id="modal-link-group-name" class="form-control" type="text" placeholder="Nhập tên nhóm link" value="@Model.LinkGroupName" />
+</div>
+<div class="text-center">
+    <input id="link-group-id" type="hidden" value="@Model.Id" />
+    <input id="modal-btn-update-link-group" class="btn btn-primary" type="button" value="Sửa nhóm link" />
+</div>
+
+<script src="~/js/update-link-group.js"></script>

@@ -1,0 +1,389 @@
+﻿@model PagedModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý backgrounds";
+    List<int> pageSizes = new List<int>();
+    pageSizes.Add(10);
+    pageSizes.Add(20);
+    pageSizes.Add(30);
+    pageSizes.Add(40);
+    pageSizes.Add(50);
+    pageSizes.Add(100);
+    pageSizes.Add(200);
+    pageSizes.Add(1000);
+}
+@section css{ 
+    <link href="/css/background.css" rel="stylesheet" />
+}
+@section scripts{ 
+    <script src="~/js/background.js"></script>
+}
+
+<input id="hidden-link-group-id" type="hidden" value="@ViewBag.LinkGroupId" />
+
+<div id="backgrounds-manager">
+    <h1 class="text-center mt-4 mb-4">Quản lý ảnh nền</h1>
+    <div class="border-bottom pb-1 mb-2">
+        <div class="w-50 float-left">
+            <div class="form-inline">
+                <select id="link-group-for-search" class="form-control">
+                    <option value="">Chọn nhóm link</option>
+                    @{
+                        var linkGroups = ViewBag.LinkGroups as List<LinkGroup>;
+                        if (linkGroups != null && linkGroups.Count > 0)
+                        {
+                            foreach (var item in linkGroups)
+                            {
+                                if (ViewBag.LinkGroupId == item.Id)
+                                {
+                                    <option value="@item.Id" selected>@item.LinkGroupName</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Id">@item.LinkGroupName</option>
+                                }
+                            }
+                        }
+                    }
+                </select>
+                <input id="btn-search" type="button" class="btn btn-primary ml-2" value="Tìm kiếm" />
+            </div>
+        </div>
+        <div class="w-50 float-left">
+            <div class="text-right">
+                <span>Thêm ảnh nền mới: </span>
+                <input type="button" class="btn btn-primary" value="Thêm mới" data-toggle="modal" data-target="#insert-background-modal" />
+            </div>
+        </div>
+        <div class="clear-both"></div>
+    </div>
+    <table class="table table-bordered table-striped">
+        <thead class="text-center">
+            <tr>
+                <th>#</th>
+                <th>Ảnh nền</th>
+                <th>Nhóm link</th>
+                <th>Thời gian tạo</th>
+                <th>Thời gian sửa</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var backgrounds = Model.Data as List<BackgroundViewModel>;
+                if (backgrounds != null)
+                {
+                    foreach (var item in backgrounds)
+                    {
+                        <tr class="text-center">
+                            <td>@item.Id</td>
+                            <td class="col-3 p-2">
+                                <img class="w-100 bg-img" src="@item.BackgroundImage" alt="Alternate Text" />
+                            </td>
+                            <td>@item.LinkGroupName</td>
+                            <td>@item.CreatedTime</td>
+                            <td>@item.UpdatedTime</td>
+                            <td>
+                                @{
+                                    if ((bool)item.IsShow)
+                                    {
+                                        <p class="text-success m-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z" />
+                                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+                                            </svg>
+                                        </p>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-danger m-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-eye-slash-fill" viewBox="0 0 16 16">
+                                                <path d="m10.79 12.912-1.614-1.615a3.5 3.5 0 0 1-4.474-4.474l-2.06-2.06C.938 6.278 0 8 0 8s3 5.5 8 5.5a7.029 7.029 0 0 0 2.79-.588zM5.21 3.088A7.028 7.028 0 0 1 8 2.5c5 0 8 5.5 8 5.5s-.939 1.721-2.641 3.238l-2.062-2.062a3.5 3.5 0 0 0-4.474-4.474L5.21 3.089z" />
+                                                <path d="M5.525 7.646a2.5 2.5 0 0 0 2.829 2.829l-2.83-2.829zm4.95.708-2.829-2.83a2.5 2.5 0 0 1 2.829 2.829zm3.171 6-12-12 .708-.708 12 12-.708.708z" />
+                                            </svg>
+                                        </p>
+                                    }
+                                }
+                            </td>
+                            <td class="col-2">
+                                <div class="btn-group d-inline-block">
+                                    <button class="btn btn-danger btn-sm btn-delete-background" background-id="@item.Id">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                            <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z" />
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-success btn-sm btn-update-background" background-id="@item.Id">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+
+    <!--Paging-->
+    <div class="mt-4 text-center">
+        <div id="pagination-container d-inline-block">
+            <ul class="list-unstyled d-inline-block">
+                @{
+                    var pageIndex = (int)ViewBag.PageIndex;
+                    var totalPage = Model.TotalPage;
+                    if (totalPage < 10)
+                    {
+                        for (int i = 1; i <= totalPage; i++)
+                        {
+                            var href = "/admin/background?linkGroupId=" + ViewBag.LinkGroupId + "&pageIndex=" + i + "&pageSize=" + ViewBag.PageSize;
+                            <li class="d-inline-block">
+                                <a href="@href">
+                                    <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                        @{
+                                            if (pageIndex == i)
+                                            {
+                                                <p class="m-0 text-warning font-weight-bold">@i</p>
+                                            }
+                                            else
+                                            {
+                                                <p class="m-0 text-white">@i</p>
+                                            }
+                                        }
+                                    </div>
+                                </a>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        var firstHref = "/admin/background?linkGroupId=" + ViewBag.LinkGroupId + "&pageIndex=" + "&pageSize=" + ViewBag.PageSize;
+                        <li class="d-inline-block">
+                            <a href="@firstHref">
+                                <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                    @{
+                                        if (pageIndex == 1)
+                                        {
+                                            <p class="m-0 text-warning font-weight-bold">1</p>
+                                        }
+                                        else
+                                        {
+                                            <p class="m-0 text-white">1</p>
+                                        }
+                                    }
+                                </div>
+                            </a>
+                        </li>
+                        if (pageIndex <= 6)
+                        {
+                            for (var i = 2; i <= 9; i++)
+                            {
+                                var href = "/admin/background?linkGroupId=" + ViewBag.LinkGroupId + "&pageIndex=" + i + "&pageSize=" + ViewBag.PageSize;
+                                <li class="d-inline-block">
+                                    <a href="@href">
+                                        <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                            @{
+                                                if (pageIndex == i)
+                                                {
+                                                    <p class="m-0 text-warning font-weight-bold">@i</p>
+                                                }
+                                                else
+                                                {
+                                                    <p class="m-0 text-white">@i</p>
+                                                }
+                                            }
+                                        </div>
+                                    </a>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="d-inline-block">
+                                <a href="#">
+                                    <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                        <p class="m-0 text-white">...</p>
+                                    </div>
+                                </a>
+                            </li>
+                            if (pageIndex <= totalPage - 5)
+                            {
+                                for (int i = pageIndex - 5; i <= pageIndex + 5; i++)
+                                {
+                                    var href = "/admin/background?linkGroupId=" + ViewBag.LinkGroupId + "&pageIndex=" + i + "&pageSize=" + ViewBag.PageSize;
+                                    <li class="d-inline-block">
+                                        <a href="@href">
+                                            <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                                @{
+                                                    if (pageIndex == i)
+                                                    {
+                                                        <p class="m-0 text-warning font-weight-bold">@i</p>
+                                                    }
+                                                    else
+                                                    {
+                                                        <p class="m-0 text-white">@i</p>
+                                                    }
+                                                }
+                                            </div>
+                                        </a>
+                                    </li>
+                                }
+                                <li class="d-inline-block">
+                                    <a href="#">
+                                        <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                            <p class="m-0 text-white">...</p>
+                                        </div>
+                                    </a>
+                                </li>
+                            }
+                            else
+                            {
+                                var lastPage = pageIndex + (totalPage - pageIndex);
+                                for (int i = pageIndex - 5; i < lastPage; i++)
+                                {
+                                    var href = "/admin/background?linkGroupId=" + ViewBag.LinkGroupId + "&pageIndex=" + i + "&pageSize=" + ViewBag.PageSize;
+                                    <li class="d-inline-block">
+                                        <a href="@href">
+                                            <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                                @{
+                                                    if (pageIndex == i)
+                                                    {
+                                                        <p class="m-0 text-warning font-weight-bold">@i</p>
+                                                    }
+                                                    else
+                                                    {
+                                                        <p class="m-0 text-white">@i</p>
+                                                    }
+                                                }
+                                            </div>
+                                        </a>
+                                    </li>
+                                }
+                            }
+                        }
+                        var lastHref = "/admin/background?linkGroupId=" + ViewBag.LinkGroupId + "&pageIndex=" + totalPage + "&pageSize=" + ViewBag.PageSize;
+                        <li class="d-inline-block">
+                            <a href="@lastHref">
+                                <div class="bg-secondary border border-secondary pt-1 pb-1 pr-2 pl-2">
+                                    @{
+                                        if (pageIndex == totalPage)
+                                        {
+                                            <p class="m-0 text-warning font-weight-bold">@totalPage</p>
+                                        }
+                                        else
+                                        {
+                                            <p class="m-0 text-white">@totalPage</p>
+                                        }
+                                    }
+                                </div>
+                            </a>
+                        </li>
+                    }
+                }
+
+            </ul>
+            <div class="d-inline-block ml-2">
+                <div class="form-inline">
+                    <label>Hiển thị:</label>
+                    <select id="page-size-select" class="form-control ml-2">
+                        @{
+                            foreach (var pageSize in pageSizes)
+                            {
+                                if (ViewBag.PageSize == pageSize)
+                                {
+                                    <option value="@pageSize" selected>@pageSize</option>
+                                }
+                                else
+                                {
+                                    <option value="@pageSize">@pageSize</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="insert-background-modal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="insert-background" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm mới ảnh nền</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="insert-background-modal-body">
+                <div>
+                    <p><span class="text-danger">(*)</span>Chọn ảnh:</p>
+                    <div class="w-50 float-left text-center">
+                        <div id="background-container">
+                            <img class="w-100" src="/images/default.jpg" />
+                        </div>
+                    </div>
+                    <div class="w-50 float-left pl-3">
+                        <input id="insert-background-url" type="hidden" />
+                        <input id="insert-background-file" type="file" style="display: none;" accept="image/*" />
+                        <button id="insert-btn-upload-background" class="btn btn-outline-secondary" title="upload ảnh">
+                            <span class="text-dark">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-upload" viewBox="0 0 16 16">
+                                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
+                                    <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
+                                </svg>
+                            </span>
+                            Upload ảnh
+                        </button>
+                        <p class="mt-3 text-danger">(Lưu ý: kích thước ảnh nền: 1920 x 1080)</p>
+                    </div>
+                    <div class="clear-both"></div>
+                </div>
+                <div class="form-group mt-3">
+                    <label>Nhóm link:</label>
+                    <select id="link-group-id" class="form-control">
+                        <option value="">Chọn nhóm link</option>
+                        @{
+                            if (linkGroups != null && linkGroups.Count > 0)
+                            {
+                                foreach (var item in linkGroups)
+                                {
+                                    if (ViewBag.LinkGroupId == item.Id)
+                                    {
+                                        <option value="@item.Id" selected>@item.LinkGroupName</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Id">@item.LinkGroupName</option>
+                                    }
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="text-center mt-4 mb-2">
+                    <input id="btn-insert-background" type="button" class="btn btn-primary" value="Thêm mới" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="update-background-modal" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="update-background" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa ảnh nền</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="update-background-modal-body">
+                
+            </div>
+        </div>
+    </div>
+</div>
